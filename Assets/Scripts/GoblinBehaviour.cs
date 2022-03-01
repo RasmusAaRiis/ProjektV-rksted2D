@@ -4,60 +4,69 @@ using UnityEngine;
 
 public class GoblinBehaviour : MonoBehaviour
 {
-    private Transform food;
+    private Transform target;
     [SerializeField] private float speed;
     public GameObject Food;
     Animator anim;
-    float movement;
-    private bool left, right;
+    private SpriteRenderer goblinSprite;
+    public GameObject Exit;
+
+    
 
     // Start is called before the first frame update
     void Start()
     {
-        right = true;
+        
         Food = GameObject.Find("Beef");
-        food = Food.transform;
+        target = Food.transform;
         anim = GetComponent<Animator>();
-        anim.SetBool("walking", true);
-        TurnLeft();
+        goblinSprite = GetComponent<SpriteRenderer>();
+        
+        
+        
     }
 
     // Update is called once per frame
     void Update()
     {
         FollowFood();
-        float movement = 1; //skal være lig med goblins horizontale bevægelse
-        Debug.Log(movement);
-        if (movement < 0)
-        { 
-            TurnLeft();
-        }
-        else if (movement > 0)
-        {        
-            TurnRight();
-        }
-            
-       
+        Rotate(target.position.x, transform.position.x);
+
+
     }
     public void FollowFood()
     {
-        transform.position = Vector3.MoveTowards(transform.position, food.position, speed * Time.deltaTime);
+        transform.position = Vector3.MoveTowards(transform.position, target.position, speed * Time.deltaTime);
         
     }
-    public void TurnLeft()
+
+
+    void Rotate(float targetX, float goblinX)
     {
-        if (left)
-            return;
-        transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
-        left = true;
-        right = false;
+        if (goblinX >= targetX)
+        {
+            goblinSprite.flipX = true;
+        }
+        else
+        {
+            goblinSprite.flipX = false;
+        }
     }
-    public void TurnRight()
+
+    private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (right)
-            return;
-        transform.localScale = new Vector3(Mathf.Abs(transform.localScale.x), transform.localScale.y, transform.localScale.z);
-        left = false;
-        right = true;
+        
+        if (collision.gameObject == Food)
+        {
+        
+        Destroy(Food);
+            target = Exit.transform; 
+
+        }
+
+        if (collision.gameObject == Exit)
+        {
+            Destroy(gameObject);
+        }
     }
 }
